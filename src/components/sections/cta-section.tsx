@@ -8,17 +8,17 @@ import { ScrollReveal, LineReveal } from "@/components/ui/scroll-animation";
 
 export function CTASection() {
   return (
-    <section className="keller-section bg-foreground">
+    <section className="keller-section bg-[#1F1F1F] dark:bg-[#0a0a0a]">
       <div className="keller-container">
         <div className="max-w-3xl mx-auto text-center space-y-8">
           <LineReveal direction="center" delay={0} />
           <ScrollReveal delay={100} direction="up">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-background">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white">
               Bereit für Ihre Traumküche?
             </h2>
           </ScrollReveal>
           <ScrollReveal delay={200} direction="up">
-            <p className="text-lg md:text-xl text-background/80 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
               Starten Sie jetzt mit einer kostenlosen Beratung. Wir freuen uns
               darauf, Ihre Ideen in die Realität umzusetzen.
             </p>
@@ -29,7 +29,7 @@ export function CTASection() {
               <Button
                 asChild
                 size="lg"
-                className="h-14 px-8 text-base bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
+                className="h-14 px-8 text-base bg-[#D62828] hover:bg-[#B82020] text-white font-semibold shadow-lg shadow-[#D62828]/30"
               >
                 <Link href="/termin-buchen">
                   <Calendar className="h-5 w-5 mr-2" />
@@ -39,7 +39,7 @@ export function CTASection() {
               <Button
                 asChild
                 size="lg"
-                className="h-14 px-8 text-base bg-transparent border-2 border-background/40 text-background hover:bg-background/10 hover:border-background/60"
+                className="h-14 px-8 text-base bg-transparent border-2 border-white/40 text-white hover:bg-white/10 hover:border-white/60"
               >
                 <a href={`tel:${BUSINESS_INFO.phoneFormatted}`} className="flex items-center">
                   <Phone className="h-5 w-5 mr-2" />
