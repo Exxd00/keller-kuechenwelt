@@ -1,0 +1,444 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Mode - Modern Gray & Red Palette */
+    /* Clean, professional, vibrant accents */
+
+    --background: 0 0% 97%; /* #F7F7F7 */
+    --foreground: 0 0% 12%; /* #1F1F1F */
+
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 0 0% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 12%;
+
+    --primary: 0 79% 50%; /* #D62828 - Brand Red */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 95%; /* Light gray */
+    --secondary-foreground: 0 0% 18%;
+
+    --muted: 0 0% 93%;
+    --muted-foreground: 0 0% 27%; /* #444444 */
+
+    --accent: 0 79% 50%; /* Same as primary for consistency */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 79% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 79% 50%;
+
+    --radius: 0.75rem;
+
+    /* Custom Keller colors */
+    --keller-red: 0 79% 50%; /* #D62828 */
+    --keller-red-light: 11 100% 62%; /* #FF5A3C */
+    --keller-pink: 349 100% 65%; /* #FF4D6D */
+    --keller-purple: 250 100% 69%; /* #7B61FF */
+    --keller-dark: 0 0% 12%; /* #1F1F1F */
+    --keller-gray: 0 0% 18%; /* #2F2F2F */
+  }
+
+  .dark {
+    /* Dark Mode - Modern Dark Gray & Red */
+    /* Sleek, premium, vibrant accents */
+
+    --background: 240 7% 6%; /* #0F0F10 */
+    --foreground: 0 0% 95%; /* Near white */
+
+    --card: 0 0% 12%; /* #1F1F1F */
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 0 79% 50%; /* #D62828 - Brand Red */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 15%; /* #262626 */
+    --secondary-foreground: 0 0% 84%; /* #D6D6D6 */
+
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 0 79% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 79% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 79% 55%;
+
+    /* Custom Keller colors - Dark mode */
+    --keller-red: 0 79% 50%;
+    --keller-red-light: 11 100% 62%;
+    --keller-pink: 349 100% 65%;
+    --keller-purple: 250 100% 69%;
+    --keller-dark: 0 0% 12%;
+    --keller-gray: 0 0% 18%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .keller-gradient {
+    @apply bg-gradient-to-br from-background via-background to-secondary/60;
+  }
+
+  .keller-gradient-accent {
+    background: linear-gradient(135deg, #D62828, #FF5A3C, #FF4D6D);
+  }
+
+  .keller-gradient-text {
+    background: linear-gradient(135deg, #D62828, #FF5A3C, #FF4D6D);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .keller-section {
+    @apply py-16 md:py-24 lg:py-32;
+  }
+
+  .keller-container {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+  }
+
+  .keller-card {
+    @apply bg-card rounded-xl border border-border/50 shadow-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300;
+  }
+
+  .keller-button-primary {
+    @apply bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6 py-3 rounded-lg transition-all duration-300 hover:translate-y-[-2px] hover:shadow-lg hover:shadow-primary/20;
+  }
+
+  .keller-button-secondary {
+    @apply bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium px-6 py-3 rounded-lg border border-border transition-all duration-300;
+  }
+
+  .keller-heading-1 {
+    @apply text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1];
+  }
+
+  .keller-heading-2 {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.15];
+  }
+
+  .keller-heading-3 {
+    @apply text-2xl md:text-3xl font-semibold tracking-tight;
+  }
+
+  .keller-body {
+    @apply text-base md:text-lg text-muted-foreground leading-relaxed;
+  }
+
+  .keller-label {
+    @apply text-sm font-medium uppercase tracking-wider text-primary;
+  }
+}
+
+@layer utilities {
+  /* Cinematic Animations */
+  .animate-fade-in {
+    animation: fadeIn 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-slide-up {
+    animation: cinematicSlideUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-slide-down {
+    animation: slideDown 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-blur-in {
+    animation: blurIn 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-cinematic-reveal {
+    animation: cinematicReveal 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes cinematicSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+      filter: blur(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes blurIn {
+    from {
+      opacity: 0;
+      filter: blur(20px);
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+    }
+  }
+
+  @keyframes cinematicReveal {
+    0% {
+      opacity: 0;
+      transform: translateY(60px) scale(0.98);
+      filter: blur(15px);
+    }
+    50% {
+      filter: blur(5px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+  }
+
+  /* Scroll-triggered animations */
+  .animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+  .animation-delay-600 { animation-delay: 600ms; }
+  .animation-delay-700 { animation-delay: 700ms; }
+  .animation-delay-800 { animation-delay: 800ms; }
+  .animation-delay-1000 { animation-delay: 1000ms; }
+  .animation-delay-1200 { animation-delay: 1200ms; }
+  .animation-delay-1500 { animation-delay: 1500ms; }
+  .animation-delay-2000 { animation-delay: 2000ms; }
+
+  /* Red Glow Animation for accents */
+  .animate-red-glow {
+    animation: redGlow 2s ease-in-out;
+  }
+
+  @keyframes redGlow {
+    0% {
+      text-shadow: 0 0 20px rgba(214, 40, 40, 0);
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    50% {
+      text-shadow: 0 0 60px rgba(214, 40, 40, 0.8), 0 0 100px rgba(214, 40, 40, 0.4);
+      opacity: 1;
+      transform: scale(1);
+    }
+    100% {
+      text-shadow: 0 0 40px rgba(214, 40, 40, 0.5), 0 0 80px rgba(214, 40, 40, 0.3);
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Line Reveal Animation */
+  .animate-line-reveal {
+    animation: lineReveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes lineReveal {
+    from {
+      width: 0;
+      opacity: 0;
+    }
+    to {
+      width: 6rem;
+      opacity: 1;
+    }
+  }
+
+  /* Transition durations for blur effects */
+  .duration-800 {
+    transition-duration: 800ms;
+  }
+
+  .duration-1500 {
+    transition-duration: 1500ms;
+  }
+
+  .duration-2000 {
+    transition-duration: 2000ms;
+  }
+
+  /* Blur utilities */
+  .blur-0 {
+    filter: blur(0);
+  }
+
+  /* Infinite marquee animation */
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Pause on hover */
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-marquee {
+      animation: none;
+    }
+  }
+
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Pulse once animation */
+  .animate-pulse-once {
+    animation: pulseOnce 2s ease-out;
+  }
+
+  @keyframes pulseOnce {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    25% {
+      opacity: 0.9;
+      transform: scale(1.01);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    75% {
+      opacity: 0.9;
+      transform: scale(1.01);
+    }
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-secondary;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary/40 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-primary/60;
+}
+
+/* Focus styles */
+:focus-visible {
+  @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+}
+
+/* Selection */
+::selection {
+  @apply bg-primary/25 text-foreground;
+}
