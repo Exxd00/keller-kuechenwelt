@@ -30,23 +30,24 @@ export function ThemeProvider({
   defaultTheme = "light",
   storageKey = "keller-kuechenwelt-theme",
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === "undefined") return defaultTheme;
-    const stored = localStorage.getItem(storageKey) as Theme | null;
-    return stored || defaultTheme;
-  });
+  // Initialize with default values for SSR
+  const [theme, setTheme] = useState<Theme>(defaultTheme);
+  const [resolvedTheme, setResolvedTheme] = useState<"dark" | "light">("light");
+  const [mounted, setMounted] = useState(false);
 
-  const [resolvedTheme, setResolvedTheme] = useState<"dark" | "light">(() => {
-    if (typeof window === "undefined") return "light";
-    const stored = localStorage.getItem(storageKey) as Theme | null;
-    const currentTheme = stored || defaultTheme;
-    if (currentTheme === "system") {
-      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    }
-    return currentTheme;
-  });
-
+  // Load theme from localStorage after mount
   useEffect(() => {
+    setMounted(true);
+    const stored = localStorage.getItem(storageKey) as Theme | null;
+    if (stored) {
+      setTheme(stored);
+    }
+  }, [storageKey]);
+
+  // Apply theme to document
+  useEffect(() => {
+    if (!mounted) return;
+
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
 
@@ -62,9 +63,12 @@ export function ThemeProvider({
 
     root.classList.add(effectiveTheme);
     setResolvedTheme(effectiveTheme);
-  }, [theme]);
+  }, [theme, mounted]);
 
+  // Listen for system theme changes
   useEffect(() => {
+    if (!mounted) return;
+
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
     const handleChange = () => {
@@ -79,7 +83,7 @@ export function ThemeProvider({
 
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [theme]);
+  }, [theme, mounted]);
 
   const value = {
     theme,
