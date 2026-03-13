@@ -21,7 +21,8 @@ const VIDEO_SOURCES = [
 const FALLBACK_IMAGE = "/kitchen/shot_01.png";
 
 export function Hero() {
-  const [isRevealed, setIsRevealed] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(true); // Start revealed for SSR
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
@@ -29,13 +30,15 @@ export function Hero() {
   const [isMuted, setIsMuted] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [mounted, setMounted] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Start reveal animation on mount
+  // Mount effect
   useEffect(() => {
     setMounted(true);
+    // Reset reveal state for animation
+    setIsRevealed(false);
+    // Trigger reveal animation after a short delay
     const timer = setTimeout(() => {
       setIsRevealed(true);
     }, 100);
@@ -44,10 +47,10 @@ export function Hero() {
 
   // Try to load video
   useEffect(() => {
-    if (videoRef.current) {
+    if (videoRef.current && mounted) {
       videoRef.current.load();
     }
-  }, [currentVideoIndex]);
+  }, [currentVideoIndex, mounted]);
 
   // Handle video loading and fallback
   const handleVideoError = useCallback(() => {
@@ -100,24 +103,26 @@ export function Hero() {
     }
   }, [isMuted]);
 
-  // Parallax mouse effect
+  // Parallax mouse effect - only on client
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!heroRef.current) return;
+    if (!heroRef.current || !mounted) return;
     const rect = heroRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left - rect.width / 2) / rect.width;
     const y = (e.clientY - rect.top - rect.height / 2) / rect.height;
     setMousePosition({ x: x * -5, y: y * -5 });
-  }, []);
+  }, [mounted]);
 
-  // Scroll effect
+  // Scroll effect - only on client
   const handleScroll = useCallback(() => {
-    if (!heroRef.current) return;
+    if (!heroRef.current || !mounted) return;
     const rect = heroRef.current.getBoundingClientRect();
     const progress = Math.max(0, Math.min(1, -rect.top / rect.height));
     setScrollProgress(progress);
-  }, []);
+  }, [mounted]);
 
   useEffect(() => {
+    if (!mounted) return;
+
     const heroElement = heroRef.current;
     if (heroElement) {
       heroElement.addEventListener("mousemove", handleMouseMove);
@@ -127,11 +132,11 @@ export function Hero() {
         window.removeEventListener("scroll", handleScroll);
       };
     }
-  }, [handleMouseMove, handleScroll]);
+  }, [handleMouseMove, handleScroll, mounted]);
 
-  const scrollBlur = scrollProgress * 20;
-  const scrollOpacity = 1 - scrollProgress * 1.5;
-  const scrollY = scrollProgress * -100;
+  const scrollBlur = mounted ? scrollProgress * 20 : 0;
+  const scrollOpacity = mounted ? 1 - scrollProgress * 1.5 : 1;
+  const scrollY = mounted ? scrollProgress * -100 : 0;
 
   return (
     <section
@@ -159,7 +164,7 @@ export function Hero() {
         </div>
 
         {/* Video Element */}
-        {!videoError && (
+        {mounted && !videoError && (
           <video
             ref={videoRef}
             key={currentVideoIndex}
@@ -202,60 +207,58 @@ export function Hero() {
       </div>
 
       {/* Video control buttons */}
-      <div
-        className={cn(
-          "absolute bottom-24 right-8 z-20 flex gap-3",
-          "transition-all duration-500",
-          isRevealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-        )}
-        style={{ transitionDelay: "2000ms" }}
-      >
-        {videoLoaded && !videoError && (
-          <>
-            <button
-              onClick={toggleMute}
-              className={cn(
-                "w-12 h-12 rounded-full",
-                "bg-white/10 backdrop-blur-sm border border-white/20",
-                "flex items-center justify-center",
-                "hover:bg-white/20 hover:scale-105",
-                "transition-all duration-300"
-              )}
-              aria-label={isMuted ? "Unmute video" : "Mute video"}
-            >
-              {isMuted ? (
-                <VolumeX className="w-5 h-5 text-white/70" />
-              ) : (
-                <Volume2 className="w-5 h-5 text-white/70" />
-              )}
-            </button>
-            <button
-              onClick={toggleVideo}
-              className={cn(
-                "w-12 h-12 rounded-full",
-                "bg-white/10 backdrop-blur-sm border border-white/20",
-                "flex items-center justify-center",
-                "hover:bg-white/20 hover:scale-105",
-                "transition-all duration-300"
-              )}
-              aria-label={isPlaying ? "Pause video" : "Play video"}
-            >
-              {isPlaying ? (
-                <Pause className="w-5 h-5 text-white/70" />
-              ) : (
-                <Play className="w-5 h-5 text-white/70 ml-0.5" />
-              )}
-            </button>
-          </>
-        )}
-      </div>
+      {mounted && videoLoaded && !videoError && (
+        <div
+          className={cn(
+            "absolute bottom-24 right-8 z-20 flex gap-3",
+            "transition-all duration-500",
+            isRevealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          )}
+          style={{ transitionDelay: "2000ms" }}
+        >
+          <button
+            onClick={toggleMute}
+            className={cn(
+              "w-12 h-12 rounded-full",
+              "bg-white/10 backdrop-blur-sm border border-white/20",
+              "flex items-center justify-center",
+              "hover:bg-white/20 hover:scale-105",
+              "transition-all duration-300"
+            )}
+            aria-label={isMuted ? "Unmute video" : "Mute video"}
+          >
+            {isMuted ? (
+              <VolumeX className="w-5 h-5 text-white/70" />
+            ) : (
+              <Volume2 className="w-5 h-5 text-white/70" />
+            )}
+          </button>
+          <button
+            onClick={toggleVideo}
+            className={cn(
+              "w-12 h-12 rounded-full",
+              "bg-white/10 backdrop-blur-sm border border-white/20",
+              "flex items-center justify-center",
+              "hover:bg-white/20 hover:scale-105",
+              "transition-all duration-300"
+            )}
+            aria-label={isPlaying ? "Pause video" : "Play video"}
+          >
+            {isPlaying ? (
+              <Pause className="w-5 h-5 text-white/70" />
+            ) : (
+              <Play className="w-5 h-5 text-white/70 ml-0.5" />
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Main Content */}
       <div
         className="keller-container relative z-20 pt-24 pb-20"
         style={{
-          transform: `translate(${mousePosition.x}px, ${mousePosition.y + scrollY}px)`,
-          filter: `blur(${scrollBlur}px)`,
+          transform: mounted ? `translate(${mousePosition.x}px, ${mousePosition.y + scrollY}px)` : 'none',
+          filter: mounted ? `blur(${scrollBlur}px)` : 'none',
           opacity: Math.max(0, scrollOpacity),
           transition: "transform 0.15s ease-out",
         }}
@@ -267,10 +270,9 @@ export function Hero() {
               className={cn(
                 "inline-flex items-center gap-2 px-4 py-2 rounded-full",
                 "bg-white/10 backdrop-blur-sm border border-white/10",
-                "transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
-                isRevealed
-                  ? "translate-y-0 opacity-100"
-                  : "translate-y-[20px] opacity-0"
+                mounted && "transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+                mounted && !isRevealed && "translate-y-[20px] opacity-0",
+                (!mounted || isRevealed) && "translate-y-0 opacity-100"
               )}
             >
               <span className="w-2 h-2 rounded-full bg-[#D62828] animate-pulse" />
@@ -285,13 +287,12 @@ export function Hero() {
                 <span
                   className={cn(
                     "block text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-[1.05] text-white",
-                    "transition-all duration-[2000ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
-                    isRevealed
-                      ? "translate-y-0 opacity-100 blur-0"
-                      : "translate-y-[30px] opacity-0 blur-[20px]"
+                    mounted && "transition-all duration-[2000ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+                    mounted && !isRevealed && "translate-y-[30px] opacity-0 blur-[20px]",
+                    (!mounted || isRevealed) && "translate-y-0 opacity-100 blur-0"
                   )}
                   style={{
-                    transitionDelay: "100ms",
+                    transitionDelay: mounted ? "100ms" : "0ms",
                   }}
                 >
                   Ihre Traumküche
@@ -300,17 +301,16 @@ export function Hero() {
                 <span
                   className={cn(
                     "block text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-[1.05]",
-                    "transition-all duration-[2000ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
-                    isRevealed
-                      ? "translate-y-0 opacity-100 blur-0"
-                      : "translate-y-[30px] opacity-0 blur-[20px]"
+                    mounted && "transition-all duration-[2000ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+                    mounted && !isRevealed && "translate-y-[30px] opacity-0 blur-[20px]",
+                    (!mounted || isRevealed) && "translate-y-0 opacity-100 blur-0"
                   )}
                   style={{
                     background: "linear-gradient(135deg, #D62828 0%, #FF5A3C 50%, #FF4D6D 100%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
-                    transitionDelay: "250ms",
+                    transitionDelay: mounted ? "250ms" : "0ms",
                   }}
                 >
                   beginnt hier.
@@ -322,12 +322,11 @@ export function Hero() {
             <p
               className={cn(
                 "text-lg md:text-xl text-white/60 max-w-xl leading-relaxed",
-                "transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
-                isRevealed
-                  ? "translate-y-0 opacity-100 blur-0"
-                  : "translate-y-[20px] opacity-0 blur-[10px]"
+                mounted && "transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+                mounted && !isRevealed && "translate-y-[20px] opacity-0 blur-[10px]",
+                (!mounted || isRevealed) && "translate-y-0 opacity-100 blur-0"
               )}
-              style={{ transitionDelay: "500ms" }}
+              style={{ transitionDelay: mounted ? "500ms" : "0ms" }}
             >
               Exklusive Küchenplanung aus Nürnberg. Maßgeschneiderte Lösungen,
               hochwertige Marken und persönliche Beratung.
@@ -343,11 +342,10 @@ export function Hero() {
                   "shadow-lg shadow-[#D62828]/30 border-0",
                   "hover:shadow-[#D62828]/50 hover:scale-[1.02]",
                   "transition-all duration-300 ease-out",
-                  isRevealed
-                    ? "translate-y-0 opacity-100"
-                    : "translate-y-[20px] opacity-0"
+                  mounted && !isRevealed && "translate-y-[20px] opacity-0",
+                  (!mounted || isRevealed) && "translate-y-0 opacity-100"
                 )}
-                style={{ transitionDelay: "700ms" }}
+                style={{ transitionDelay: mounted ? "700ms" : "0ms" }}
               >
                 <Link href="/termin-buchen">
                   <Calendar className="h-5 w-5 mr-2" />
@@ -363,11 +361,10 @@ export function Hero() {
                   "h-14 px-8 text-base bg-white/5 backdrop-blur-sm border-white/20 text-white",
                   "hover:bg-white/10 hover:border-white/40",
                   "transition-all duration-300 ease-out",
-                  isRevealed
-                    ? "translate-y-0 opacity-100"
-                    : "translate-y-[20px] opacity-0"
+                  mounted && !isRevealed && "translate-y-[20px] opacity-0",
+                  (!mounted || isRevealed) && "translate-y-0 opacity-100"
                 )}
-                style={{ transitionDelay: "850ms" }}
+                style={{ transitionDelay: mounted ? "850ms" : "0ms" }}
               >
                 <Link href="#beratung">
                   <MessageSquare className="h-5 w-5 mr-2" />
@@ -380,12 +377,11 @@ export function Hero() {
             <div
               className={cn(
                 "flex flex-wrap gap-8 pt-8 border-t border-white/10",
-                "transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
-                isRevealed
-                  ? "translate-y-0 opacity-100"
-                  : "translate-y-[20px] opacity-0"
+                mounted && "transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+                mounted && !isRevealed && "translate-y-[20px] opacity-0",
+                (!mounted || isRevealed) && "translate-y-0 opacity-100"
               )}
-              style={{ transitionDelay: "1000ms" }}
+              style={{ transitionDelay: mounted ? "1000ms" : "0ms" }}
             >
               <div>
                 <div className="text-3xl md:text-4xl font-bold text-white">10+</div>
@@ -408,44 +404,46 @@ export function Hero() {
       <div
         className={cn(
           "absolute top-0 right-0 w-1/3 h-px z-20",
-          "transition-all duration-1000",
-          isRevealed ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
+          mounted && "transition-all duration-1000",
+          (!mounted || isRevealed) ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
         )}
         style={{
           background: "linear-gradient(to left, #D62828, transparent)",
-          transitionDelay: "1200ms",
+          transitionDelay: mounted ? "1200ms" : "0ms",
           transformOrigin: "right"
         }}
       />
       <div
         className={cn(
           "absolute top-0 right-0 w-px h-1/4 z-20",
-          "transition-all duration-1000",
-          isRevealed ? "opacity-100 scale-y-100" : "opacity-0 scale-y-0"
+          mounted && "transition-all duration-1000",
+          (!mounted || isRevealed) ? "opacity-100 scale-y-100" : "opacity-0 scale-y-0"
         )}
         style={{
           background: "linear-gradient(to bottom, #D62828, transparent)",
-          transitionDelay: "1200ms",
+          transitionDelay: mounted ? "1200ms" : "0ms",
           transformOrigin: "top"
         }}
       />
 
       {/* Scroll indicator */}
-      <div
-        className={cn(
-          "absolute bottom-8 left-1/2 -translate-x-1/2 z-20",
-          "transition-all duration-1000",
-          isRevealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-        )}
-        style={{ transitionDelay: "2500ms" }}
-      >
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-xs text-white/40 uppercase tracking-widest">Scroll</span>
-          <div className="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center pt-2">
-            <div className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" />
+      {mounted && (
+        <div
+          className={cn(
+            "absolute bottom-8 left-1/2 -translate-x-1/2 z-20",
+            "transition-all duration-1000",
+            isRevealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          )}
+          style={{ transitionDelay: "2500ms" }}
+        >
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-xs text-white/40 uppercase tracking-widest">Scroll</span>
+            <div className="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center pt-2">
+              <div className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }
